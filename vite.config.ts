@@ -153,7 +153,6 @@ function vitePluginManusDebugCollector(): Plugin {
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
 
 export default defineConfig({
-  base: process.env.GITHUB_ACTIONS ? '/ai-ethics-foundations/' : '/',
   plugins,
   resolve: {
     alias: {
