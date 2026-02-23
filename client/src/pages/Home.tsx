@@ -234,9 +234,9 @@ export default function Home() {
 
           // Static lines — always visible, no glow, no pulse
           const strokeColor = dimmed
-            ? "rgba(212,175,55,0.08)"
-            : "rgba(212,175,55,0.3)";
-          const strokeWidth = 1.8;
+            ? "rgba(212,175,55,0.12)"
+            : "rgba(212,175,55,0.55)";
+          const strokeWidth = 2.2;
 
           return (
             <g key={conn.philosopherId}>
@@ -498,17 +498,22 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ===== PIONEERS ROW ===== */}
-      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "16vh" }}>
-        {pioneers.map((p, i) => (
+      {/* ===== PIONEERS ROW (curved arc) ===== */}
+      <div className="flex justify-around items-end px-2 shrink-0 relative z-[2]" style={{ height: "20vh" }}>
+        {pioneers.map((p, i) => {
+          // Arc offset: edges higher, center lower (concave arc)
+          const arcOffsets = [0, -1.8, -2.8, -1.8, 0]; // vh units
+          const arcOffset = arcOffsets[i] || 0;
+          return (
           <div
             key={p.id}
             ref={(el) => { pionRefs.current[i] = el; }}
             className="flex flex-col items-center cursor-pointer"
             style={{
               opacity: getNodeOpacity(p.id),
-              transition: "opacity 0.5s",
+              transition: "opacity 0.5s, transform 0.5s",
               width: "18%",
+              transform: `translateY(${arcOffset}vh)`,
             }}
             onClick={() => handleNodeClick(p.id)}
           >
@@ -579,7 +584,8 @@ export default function Home() {
               {p.field}
             </p>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* ===== FOOTER ===== */}
