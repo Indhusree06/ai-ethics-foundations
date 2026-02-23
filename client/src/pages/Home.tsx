@@ -332,17 +332,31 @@ export default function Home() {
           const dimmed =
             detailLevel !== "idle" && !isNodeActive(conn.philosopherId);
 
-          // Organic curved path: philosopher → principle
-          const midY1 = coords.y1 + (coords.y2 - coords.y1) * 0.5;
-          const cpX1a = coords.x1 + (coords.x2 - coords.x1) * 0.15;
-          const cpX1b = coords.x2 - (coords.x2 - coords.x1) * 0.15;
-          const topPath = `M ${coords.x1} ${coords.y1} C ${cpX1a} ${midY1}, ${cpX1b} ${midY1}, ${coords.x2} ${coords.y2}`;
+          // Truly curved bezier path: philosopher → principle
+          // Alternating curve direction per connection index for visual variety
+          const dy1 = coords.y2 - coords.y1;
+          const dx1 = coords.x2 - coords.x1;
+          // Force a minimum horizontal bulge so even vertically-aligned nodes get visible curves
+          const curveDir1 = (i % 2 === 0) ? 1 : -1; // alternate left/right bulge
+          const minBulge1 = dy1 * 0.35; // at least 35% of vertical distance as horizontal offset
+          const bulge1 = Math.max(Math.abs(dx1) * 0.5, minBulge1) * curveDir1;
+          const cp1x = coords.x1 + bulge1;
+          const cp1y = coords.y1 + dy1 * 0.7;
+          const cp2x = coords.x2 + bulge1 * 0.4;
+          const cp2y = coords.y2 - dy1 * 0.3;
+          const topPath = `M ${coords.x1} ${coords.y1} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${coords.x2} ${coords.y2}`;
 
-          // Organic curved path: principle → pioneer
-          const midY2 = coords.y2 + (coords.y3 - coords.y2) * 0.5;
-          const cpX2a = coords.x2 + (coords.x3 - coords.x2) * 0.15;
-          const cpX2b = coords.x3 - (coords.x3 - coords.x2) * 0.15;
-          const bottomPath = `M ${coords.x2} ${coords.y2} C ${cpX2a} ${midY2}, ${cpX2b} ${midY2}, ${coords.x3} ${coords.y3}`;
+          // Truly curved bezier path: principle → pioneer
+          const dy2 = coords.y3 - coords.y2;
+          const dx2 = coords.x3 - coords.x2;
+          const curveDir2 = (i % 2 === 0) ? -1 : 1; // opposite direction from top path
+          const minBulge2 = dy2 * 0.35;
+          const bulge2 = Math.max(Math.abs(dx2) * 0.5, minBulge2) * curveDir2;
+          const cp3x = coords.x2 + bulge2;
+          const cp3y = coords.y2 + dy2 * 0.7;
+          const cp4x = coords.x3 + bulge2 * 0.4;
+          const cp4y = coords.y3 - dy2 * 0.3;
+          const bottomPath = `M ${coords.x2} ${coords.y2} C ${cp3x} ${cp3y}, ${cp4x} ${cp4y}, ${coords.x3} ${coords.y3}`;
 
           const baseStroke = dimmed
             ? "rgba(212,175,55,0.03)"
@@ -521,7 +535,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ===== PRINCIPLES ROW (Shield shapes with icons) ===== */}
+      {/* ===== PRINCIPLES ROW (Diamond shapes with icons) ===== */}
       <div className="flex justify-around items-center px-1 shrink-0 relative" style={{ zIndex: 2, minHeight: "8vh" }}>
         {principles.map((pr, i) => {
           const glowing =
@@ -540,36 +554,37 @@ export default function Home() {
               }}
               onClick={() => handleNodeClick(pr.id)}
             >
-              {/* Shield shape via CSS border-radius */}
+              {/* Diamond shape via CSS rotate */}
               <div
                 className="relative flex items-center justify-center"
                 style={{
-                  width: "clamp(42px, 7.5vw, 60px)",
-                  height: "clamp(48px, 8.5vw, 68px)",
+                  width: "clamp(48px, 8vw, 68px)",
+                  height: "clamp(48px, 8vw, 68px)",
                   background: glowing
-                    ? "linear-gradient(180deg, rgba(212,175,55,0.22), rgba(212,175,55,0.06))"
+                    ? "linear-gradient(135deg, rgba(212,175,55,0.25), rgba(212,175,55,0.08))"
                     : "rgba(255,248,220,0.025)",
                   border: `1.5px solid ${glowing ? "#d4af37" : "rgba(255,248,220,0.08)"}`,
-                  borderRadius: "6px 6px 50% 50%",
+                  transform: "rotate(45deg)",
                   boxShadow: glowing
                     ? "0 0 20px rgba(212,175,55,0.35), inset 0 0 12px rgba(212,175,55,0.08)"
                     : "none",
-                  transition: "all 0.6s",
+                  transition: "background 0.6s, border-color 0.6s, box-shadow 0.6s",
                 }}
               >
                 <div
                   style={{
-                    width: "clamp(16px, 3vw, 24px)",
-                    height: "clamp(16px, 3vw, 24px)",
+                    width: "clamp(18px, 3.2vw, 26px)",
+                    height: "clamp(18px, 3.2vw, 26px)",
                     color: glowing ? "#d4af37" : "rgba(255,248,220,0.25)",
                     transition: "color 0.6s",
+                    transform: "rotate(-45deg)",
                   }}
                 >
                   {principleIcons[pr.id]}
                 </div>
               </div>
               <p
-                className="mt-1 text-center font-bold uppercase"
+                className="mt-1.5 text-center font-bold uppercase"
                 style={{
                   fontSize: "clamp(5px, 0.85vw, 7px)",
                   letterSpacing: "0.06em",
@@ -677,7 +692,7 @@ export default function Home() {
         </p>
       </div>
 
-      {/* ===== IDLE HINT ===== */}
+      {/* ===== IDLE HINT (bottom-right corner) ===== */}
       <AnimatePresence>
         {detailLevel === "idle" && (
           <motion.div
@@ -685,18 +700,19 @@ export default function Home() {
             animate={{ opacity: [0.25, 0.65, 0.25] }}
             exit={{ opacity: 0 }}
             transition={{ duration: 3.5, repeat: Infinity }}
-            className="absolute bottom-[5.5vh] left-0 right-0 text-center"
+            className="absolute bottom-[0.8vh] right-3"
             style={{ zIndex: 10 }}
           >
             <p
+              className="italic"
               style={{
-                color: "rgba(255,248,220,0.5)",
+                color: "rgba(255,248,220,0.45)",
                 fontFamily: '"Inter", sans-serif',
-                fontSize: "clamp(9px, 1.3vw, 12px)",
-                letterSpacing: "0.1em",
+                fontSize: "clamp(8px, 1.1vw, 11px)",
+                letterSpacing: "0.05em",
               }}
             >
-              Touch any node to explore the connections
+              Touch any node to explore
             </p>
           </motion.div>
         )}
