@@ -86,15 +86,29 @@ export default function Home() {
       const dHalfH = prRect.height / 2;
       return {
         x1: pRect.left + pRect.width / 2 - containerRect.left,
-        // Stop line at bottom of portrait image (first child), not bottom of text
-        y1: pRect.top + Math.min(pRect.width, pRect.height * 0.6) - containerRect.top,
+        // Find the portrait circle img inside this element and use its bottom edge
+        y1: (() => {
+          const imgEl = philEl.querySelector('img');
+          if (imgEl) {
+            const imgRect = imgEl.getBoundingClientRect();
+            return imgRect.bottom - containerRect.top;
+          }
+          return pRect.top + pRect.height * 0.45 - containerRect.top;
+        })(),
         x2top: dcx,
         y2top: dcy - dHalfH,
         x2bot: dcx,
         y2bot: dcy + dHalfH,
         x3: piRect.left + piRect.width / 2 - containerRect.left,
-        // Start line at top of pioneer portrait, not above the text
-        y3: piRect.top + piRect.height * 0.08 - containerRect.top,
+        // Find the portrait circle img inside this element and use its top edge
+        y3: (() => {
+          const imgEl = pionEl.querySelector('img');
+          if (imgEl) {
+            const imgRect = imgEl.getBoundingClientRect();
+            return imgRect.top - containerRect.top;
+          }
+          return piRect.top - containerRect.top;
+        })(),
       };
     });
     setLineCoords(coords);
@@ -412,7 +426,7 @@ export default function Home() {
       </div>
 
       {/* ===== PRINCIPLES ROW ===== */}
-      <div className="flex justify-around items-center px-2 shrink-0 relative z-[2]" style={{ height: "8vh" }}>
+      <div className="flex justify-around items-center px-2 shrink-0 relative z-[2]" style={{ height: "12vh" }}>
         {principles.map((pr, i) => {
           const glowing =
             isNodeActive(pr.id) ||
@@ -450,8 +464,8 @@ export default function Home() {
                 <div
                   className="flex items-center justify-center"
                   style={{
-                    width: "clamp(85px, 15vw, 130px)",
-                    height: "clamp(50px, 9vw, 72px)",
+                    width: "clamp(110px, 18vw, 170px)",
+                    height: "clamp(65px, 11vw, 95px)",
                     background: glowing
                       ? "linear-gradient(160deg, #f5d76e 0%, #d4af37 35%, #b8941e 65%, #8a6d14 100%)"
                       : "linear-gradient(160deg, rgba(212,175,55,0.12) 0%, rgba(212,175,55,0.04) 50%, rgba(140,110,30,0.08) 100%)",
@@ -482,7 +496,7 @@ export default function Home() {
                   <span
                     className="text-center font-bold uppercase relative"
                     style={{
-                      fontSize: "clamp(7px, 1.2vw, 10px)",
+                      fontSize: "clamp(9px, 1.4vw, 13px)",
                       letterSpacing: "0.04em",
                       color: glowing ? "#1a1f3d" : "#d4af37",
                       fontFamily: '"Inter", sans-serif',
@@ -521,8 +535,8 @@ export default function Home() {
       {/* ===== PIONEERS ROW (curved arc) ===== */}
       <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "24vh" }}>
         {pioneers.map((p, i) => {
-          // Convex arc: center highest, edges lower (inverted from philosopher arc)
-          const arcOffsets = [3.5, 1.2, 0, 1.2, 3.5]; // vh units, positive = push down, center highest
+          // U-shape arc: edges high, center low (inverted from philosopher's arch)
+          const arcOffsets = [0, 1.2, 2.5, 1.2, 0]; // vh units, positive = push down, edges stay up
           const arcOffset = arcOffsets[i] || 0;
           return (
           <div
