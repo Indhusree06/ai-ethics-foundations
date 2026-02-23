@@ -86,13 +86,15 @@ export default function Home() {
       const dHalfH = prRect.height / 2;
       return {
         x1: pRect.left + pRect.width / 2 - containerRect.left,
-        y1: pRect.top + pRect.height - containerRect.top,
+        // Stop line at bottom of portrait image (first child), not bottom of text
+        y1: pRect.top + Math.min(pRect.width, pRect.height * 0.6) - containerRect.top,
         x2top: dcx,
         y2top: dcy - dHalfH,
         x2bot: dcx,
         y2bot: dcy + dHalfH,
         x3: piRect.left + piRect.width / 2 - containerRect.left,
-        y3: piRect.top - containerRect.top,
+        // Start line at top of pioneer portrait, not above the text
+        y3: piRect.top + piRect.height * 0.08 - containerRect.top,
       };
     });
     setLineCoords(coords);
@@ -517,10 +519,10 @@ export default function Home() {
       </div>
 
       {/* ===== PIONEERS ROW (curved arc) ===== */}
-      <div className="flex justify-around items-end px-2 shrink-0 relative z-[2]" style={{ height: "20vh" }}>
+      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "24vh" }}>
         {pioneers.map((p, i) => {
-          // Arc offset: edges higher, center lower (concave arc)
-          const arcOffsets = [0, -2.5, -4, -2.5, 0]; // vh units
+          // Convex arc: center highest, edges lower (inverted from philosopher arc)
+          const arcOffsets = [3.5, 1.2, 0, 1.2, 3.5]; // vh units, positive = push down, center highest
           const arcOffset = arcOffsets[i] || 0;
           return (
           <div
