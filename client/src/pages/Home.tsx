@@ -289,17 +289,22 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ===== PHILOSOPHERS ROW ===== */}
-      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "16vh" }}>
-        {philosophers.map((p, i) => (
+      {/* ===== PHILOSOPHERS ROW (convex arc) ===== */}
+      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "22vh" }}>
+        {philosophers.map((p, i) => {
+          // Convex arc: edges lower, center higher (mirroring pioneer concave arc)
+          const arcOffsets = [3.5, 1.2, 0, 1.2, 3.5]; // vh units, positive = push down
+          const arcOffset = arcOffsets[i] || 0;
+          return (
           <div
             key={p.id}
             ref={(el) => { philRefs.current[i] = el; }}
             className="flex flex-col items-center cursor-pointer"
             style={{
               opacity: getNodeOpacity(p.id),
-              transition: "opacity 0.5s",
+              transition: "opacity 0.5s, transform 0.5s",
               width: "18%",
+              transform: `translateY(${arcOffset}vh)`,
             }}
             onClick={() => handleNodeClick(p.id)}
           >
@@ -369,8 +374,21 @@ export default function Home() {
             >
               {p.framework}
             </p>
+            <p
+              className="text-center leading-tight mt-0.5"
+              style={{
+                fontSize: "clamp(5px, 0.9vw, 7.5px)",
+                color: "rgba(255,255,255,0.5)",
+                fontFamily: '"Inter", sans-serif',
+                fontStyle: "italic",
+                maxWidth: "90%",
+              }}
+            >
+              '{p.quote}'
+            </p>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* ===== SPACER FOR TOP CONNECTIONS ===== */}
@@ -502,7 +520,7 @@ export default function Home() {
       <div className="flex justify-around items-end px-2 shrink-0 relative z-[2]" style={{ height: "20vh" }}>
         {pioneers.map((p, i) => {
           // Arc offset: edges higher, center lower (concave arc)
-          const arcOffsets = [0, -1.8, -2.8, -1.8, 0]; // vh units
+          const arcOffsets = [0, -2.5, -4, -2.5, 0]; // vh units
           const arcOffset = arcOffsets[i] || 0;
           return (
           <div
