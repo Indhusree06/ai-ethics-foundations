@@ -23,6 +23,37 @@ type DetailLevel = "idle" | "level1" | "level2" | "level3";
 
 const IDLE_TIMEOUT = 7 * 60 * 1000;
 
+const BG_IMAGE_URL = "https://private-us-east-1.manuscdn.com/sessionFile/dvPvZT8Fdt169EOFpRSN1m/sandbox/x5hGUKJgUkDWHWodJDe1Go-img-1_1771864241000_na1fn_YmdfZXRoaWNz.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZHZQdlpUOEZkdDE2OUVPRnBSU04xbS9zYW5kYm94L3g1aEdVS0pnVWtEV0hXb2RKRGUxR28taW1nLTFfMTc3MTg2NDI0MTAwMF9uYTFmbl9ZbWRmWlhSb2FXTnoucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=mECrdXdGyJ1RQyL8xIjbxxKyp1HY~Zj~R6YGN86Mq6FUDFk3Dz7g~~Xbpzyw5xfI78rBzm~1QXjOEJ4nwx5zTnzbkDKRXtoz9AfiHoCD7cYF6Is~mqRd-VeV8xnsz-3HtOTD9b5LlVTGBIm2H4CONoBomGcp3-48nY9~It1bHUcSUoekmMAtyefw4Tp7bcA3~AEhhoIOnDQSHP9iNeNVZLZNGsGJTv9m9Uyrk~DjvpJO-2Ug7pwWtHAeh~D23Umoswu1WZn4MZJcfGOVUIz5Aw7-LPAWW40Sj2LLl7yimz-Gfj7TwLXKyoEL~u7YDlAvzufsYW0U66Lqf~aZCBPE3A__";
+
+/* ===== Subtle Floating Particles ===== */
+function FloatingParticles() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
+      {Array.from({ length: 25 }).map((_, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full"
+          style={{
+            width: `${1 + (i % 3)}px`,
+            height: `${1 + (i % 3)}px`,
+            top: `${5 + (i * 3.8) % 90}%`,
+            left: `${2 + (i * 4.1) % 96}%`,
+            background: i % 4 === 0 ? "rgba(212,175,55,0.2)" : "rgba(200,210,230,0.12)",
+            animation: `floatDot ${14 + (i % 6) * 3}s ease-in-out infinite`,
+            animationDelay: `${(i * 1.1) % 10}s`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes floatDot {
+          0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+          50% { transform: translateY(-12px) scale(1.4); opacity: 0.7; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function Home() {
   const [activeConnection, setActiveConnection] = useState<ActiveConnection>(null);
   const [detailLevel, setDetailLevel] = useState<DetailLevel>("idle");
@@ -35,7 +66,7 @@ export default function Home() {
   const princRefs = useRef<(HTMLDivElement | null)[]>([]);
   const pionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [lineCoords, setLineCoords] = useState<
-    { x1: number; y1: number; x2: number; y2: number; x3: number; y3: number }[]
+    { x1: number; y1: number; x2top: number; y2top: number; x2bot: number; y2bot: number; x3: number; y3: number }[]
   >([]);
 
   // Measure positions
@@ -46,15 +77,20 @@ export default function Home() {
       const philEl = philRefs.current[i];
       const princEl = princRefs.current[i];
       const pionEl = pionRefs.current[i];
-      if (!philEl || !princEl || !pionEl) return { x1: 0, y1: 0, x2: 0, y2: 0, x3: 0, y3: 0 };
+      if (!philEl || !princEl || !pionEl) return { x1: 0, y1: 0, x2top: 0, y2top: 0, x2bot: 0, y2bot: 0, x3: 0, y3: 0 };
       const pRect = philEl.getBoundingClientRect();
       const prRect = princEl.getBoundingClientRect();
       const piRect = pionEl.getBoundingClientRect();
+      const dcx = prRect.left + prRect.width / 2 - containerRect.left;
+      const dcy = prRect.top + prRect.height / 2 - containerRect.top;
+      const dHalfH = prRect.height / 2;
       return {
         x1: pRect.left + pRect.width / 2 - containerRect.left,
         y1: pRect.top + pRect.height - containerRect.top,
-        x2: prRect.left + prRect.width / 2 - containerRect.left,
-        y2: prRect.top + prRect.height / 2 - containerRect.top,
+        x2top: dcx,
+        y2top: dcy - dHalfH,
+        x2bot: dcx,
+        y2bot: dcy + dHalfH,
         x3: piRect.left + piRect.width / 2 - containerRect.left,
         y3: piRect.top - containerRect.top,
       };
@@ -146,10 +182,13 @@ export default function Home() {
       ref={containerRef}
       className="h-screen w-screen overflow-hidden relative flex flex-col"
       style={{
-        background:
-          "linear-gradient(180deg, #0d1020 0%, #141833 8%, #1a1f3d 20%, #1a1f3d 80%, #141833 92%, #0d1020 100%)",
+        background: `url(${BG_IMAGE_URL}) center/cover no-repeat`,
       }}
     >
+      {/* Dark overlay to ensure readability */}
+      <div className="absolute inset-0" style={{ background: "rgba(13,16,32,0.55)", zIndex: 0 }} />
+      {/* Floating particles */}
+      <FloatingParticles />
       {/* ===== SVG OVERLAY FOR CONNECTIONS ===== */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none z-[1]"
@@ -179,17 +218,17 @@ export default function Home() {
           const dimmed =
             detailLevel !== "idle" && !isNodeActive(conn.philosopherId);
 
-          // Top path: philosopher → principle
+          // Top path: philosopher bottom → diamond top point
           const topPath = `M ${coords.x1} ${coords.y1} C ${coords.x1} ${
-            coords.y1 + (coords.y2 - coords.y1) * 0.6
-          }, ${coords.x2} ${coords.y2 - (coords.y2 - coords.y1) * 0.6}, ${
-            coords.x2
-          } ${coords.y2}`;
+            coords.y1 + (coords.y2top - coords.y1) * 0.6
+          }, ${coords.x2top} ${coords.y2top - (coords.y2top - coords.y1) * 0.4}, ${
+            coords.x2top
+          } ${coords.y2top}`;
 
-          // Bottom path: principle → pioneer
-          const bottomPath = `M ${coords.x2} ${coords.y2} C ${coords.x2} ${
-            coords.y2 + (coords.y3 - coords.y2) * 0.6
-          }, ${coords.x3} ${coords.y3 - (coords.y3 - coords.y2) * 0.6}, ${
+          // Bottom path: diamond bottom point → pioneer top
+          const bottomPath = `M ${coords.x2bot} ${coords.y2bot} C ${coords.x2bot} ${
+            coords.y2bot + (coords.y3 - coords.y2bot) * 0.6
+          }, ${coords.x3} ${coords.y3 - (coords.y3 - coords.y2bot) * 0.4}, ${
             coords.x3
           } ${coords.y3}`;
 
@@ -251,7 +290,7 @@ export default function Home() {
       </div>
 
       {/* ===== PHILOSOPHERS ROW ===== */}
-      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "20vh" }}>
+      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "16vh" }}>
         {philosophers.map((p, i) => (
           <div
             key={p.id}
@@ -267,9 +306,9 @@ export default function Home() {
             <div
               className="rounded-full overflow-hidden"
               style={{
-                width: "clamp(50px, 9vw, 82px)",
-                height: "clamp(50px, 9vw, 82px)",
-                border: `2.5px solid ${
+                width: "clamp(65px, 11vw, 100px)",
+                height: "clamp(65px, 11vw, 100px)",
+                border: `3px solid ${
                   isNodeActive(p.id) ||
                   (detailLevel === "idle" && connections[idleAnimIndex]?.philosopherId === p.id)
                     ? "#d4af37"
@@ -288,7 +327,7 @@ export default function Home() {
             <p
               className="mt-1.5 text-center font-semibold leading-tight"
               style={{
-                fontSize: "clamp(8px, 1.5vw, 12px)",
+                fontSize: "clamp(9px, 1.6vw, 13px)",
                 color: "#fff",
                 fontFamily: '"Inter", sans-serif',
               }}
@@ -310,17 +349,17 @@ export default function Home() {
       </div>
 
       {/* ===== SPACER FOR TOP CONNECTIONS ===== */}
-      <div className="shrink-0" style={{ height: "10vh" }} />
+      <div className="shrink-0" style={{ height: "4vh" }} />
 
-      {/* ===== CORE AI ETHICS PRINCIPLES LABEL ===== */}
+      {/* ===== CORE AI ETHICS PRINCIPLES BANNER ===== */}
       <div className="flex justify-center shrink-0 mb-[0.5vh] relative z-[2]">
         <div
-          className="px-5 py-0.5 tracking-[0.2em] font-semibold uppercase"
+          className="px-6 py-1 tracking-[0.2em] font-semibold uppercase"
           style={{
-            color: "#d4af37",
-            fontFamily: '"Playfair Display", Georgia, serif',
-            fontSize: "clamp(7px, 1.1vw, 10px)",
-            textShadow: "0 0 12px rgba(212,175,55,0.15)",
+            background: "linear-gradient(90deg, transparent, #d4af37, transparent)",
+            color: "#1a1f3d",
+            fontFamily: '"Inter", sans-serif',
+            fontSize: "clamp(8px, 1.4vw, 12px)",
           }}
         >
           Core AI Ethics Principles
@@ -328,7 +367,7 @@ export default function Home() {
       </div>
 
       {/* ===== PRINCIPLES ROW ===== */}
-      <div className="flex justify-around items-center px-2 shrink-0 relative z-[2]" style={{ height: "7vh" }}>
+      <div className="flex justify-around items-center px-2 shrink-0 relative z-[2]" style={{ height: "8vh" }}>
         {principles.map((pr, i) => {
           const glowing =
             isNodeActive(pr.id) ||
@@ -348,8 +387,8 @@ export default function Home() {
               <div
                 className="flex items-center justify-center"
                 style={{
-                  width: "clamp(70px, 13vw, 110px)",
-                  height: "clamp(42px, 7.5vw, 60px)",
+                  width: "clamp(85px, 15vw, 130px)",
+                  height: "clamp(50px, 9vw, 72px)",
                   background: glowing
                     ? "linear-gradient(135deg, #d4af37, #b8941e)"
                     : "rgba(212,175,55,0.06)",
@@ -362,7 +401,7 @@ export default function Home() {
                 <span
                   className="text-center font-bold uppercase"
                   style={{
-                    fontSize: "clamp(5.5px, 1vw, 8px)",
+                    fontSize: "clamp(7px, 1.2vw, 10px)",
                     letterSpacing: "0.04em",
                     color: glowing ? "#1a1f3d" : "#d4af37",
                     fontFamily: '"Inter", sans-serif',
@@ -378,7 +417,7 @@ export default function Home() {
       </div>
 
       {/* ===== SPACER FOR BOTTOM CONNECTIONS ===== */}
-      <div className="shrink-0" style={{ height: "8vh" }} />
+      <div className="shrink-0" style={{ height: "4vh" }} />
 
       {/* ===== MODERN PIONEERS BANNER ===== */}
       <div className="flex justify-center shrink-0 mb-[0.8vh] relative z-[2]">
@@ -396,7 +435,7 @@ export default function Home() {
       </div>
 
       {/* ===== PIONEERS ROW ===== */}
-      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "20vh" }}>
+      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "16vh" }}>
         {pioneers.map((p, i) => (
           <div
             key={p.id}
@@ -412,9 +451,9 @@ export default function Home() {
             <div
               className="rounded-full overflow-hidden"
               style={{
-                width: "clamp(50px, 9vw, 82px)",
-                height: "clamp(50px, 9vw, 82px)",
-                border: `2.5px solid ${
+                width: "clamp(65px, 11vw, 100px)",
+                height: "clamp(65px, 11vw, 100px)",
+                border: `3px solid ${
                   isNodeActive(p.id) ||
                   (detailLevel === "idle" && connections[idleAnimIndex]?.pioneerId === p.id)
                     ? "#d4af37"
@@ -433,7 +472,7 @@ export default function Home() {
             <p
               className="mt-1.5 text-center font-semibold leading-tight"
               style={{
-                fontSize: "clamp(8px, 1.5vw, 12px)",
+                fontSize: "clamp(9px, 1.6vw, 13px)",
                 color: "#fff",
                 fontFamily: '"Inter", sans-serif',
               }}
