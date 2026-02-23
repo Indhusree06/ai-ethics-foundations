@@ -306,10 +306,10 @@ export default function Home() {
       </div>
 
       {/* ===== PHILOSOPHERS ROW (convex arc) ===== */}
-      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "22vh" }}>
+      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "28vh" }}>
         {philosophers.map((p, i) => {
-          // Convex arc: edges lower, center higher (mirroring pioneer concave arc)
-          const arcOffsets = [3.5, 1.2, 0, 1.2, 3.5]; // vh units, positive = push down
+          // Convex arch: center highest, edges lowest — symmetric with pioneer U-curve
+          const arcOffsets = [7, 2.5, 0, 2.5, 7]; // vh units, positive = push down
           const arcOffset = arcOffsets[i] || 0;
           return (
           <div
@@ -408,7 +408,7 @@ export default function Home() {
       </div>
 
       {/* ===== SPACER FOR TOP CONNECTIONS ===== */}
-      <div className="shrink-0" style={{ height: "4vh" }} />
+      <div className="shrink-0" style={{ height: "1vh" }} />
 
       {/* ===== CORE AI ETHICS PRINCIPLES BANNER ===== */}
       <div className="flex justify-center shrink-0 mb-[0.5vh] relative z-[2]">
@@ -515,7 +515,7 @@ export default function Home() {
       </div>
 
       {/* ===== SPACER FOR BOTTOM CONNECTIONS ===== */}
-      <div className="shrink-0" style={{ height: "4vh" }} />
+      <div className="shrink-0" style={{ height: "1vh" }} />
 
       {/* ===== MODERN PIONEERS BANNER ===== */}
       <div className="flex justify-center shrink-0 mb-[0.8vh] relative z-[2]">
@@ -533,10 +533,10 @@ export default function Home() {
       </div>
 
       {/* ===== PIONEERS ROW (curved arc) ===== */}
-      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "24vh" }}>
+      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "28vh" }}>
         {pioneers.map((p, i) => {
-          // U-shape arc: edges high, center low (inverted from philosopher's arch)
-          const arcOffsets = [0, 1.2, 2.5, 1.2, 0]; // vh units, positive = push down, edges stay up
+          // U-shape: center lowest, edges highest — exact mirror of philosopher arch
+          const arcOffsets = [0, 4.5, 7, 4.5, 0]; // vh units, positive = push down, mirrors [7,2.5,0,2.5,7]
           const arcOffset = arcOffsets[i] || 0;
           return (
           <div
