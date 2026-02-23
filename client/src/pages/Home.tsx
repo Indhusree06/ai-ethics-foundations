@@ -176,9 +176,6 @@ export default function Home() {
         {lineCoords.map((coords, i) => {
           if (!coords.x1 && !coords.y1) return null;
           const conn = connections[i];
-          const glowing =
-            isNodeActive(conn.philosopherId) ||
-            (detailLevel === "idle" && idleAnimIndex === i);
           const dimmed =
             detailLevel !== "idle" && !isNodeActive(conn.philosopherId);
 
@@ -196,18 +193,11 @@ export default function Home() {
             coords.x3
           } ${coords.y3}`;
 
-          const fullPath = `${topPath} C ${coords.x2} ${
-            coords.y2 + (coords.y3 - coords.y2) * 0.6
-          }, ${coords.x3} ${coords.y3 - (coords.y3 - coords.y2) * 0.6}, ${
-            coords.x3
-          } ${coords.y3}`;
-
-          const strokeColor = glowing
-            ? "#d4af37"
-            : dimmed
-            ? "rgba(212,175,55,0.05)"
-            : "rgba(212,175,55,0.25)";
-          const strokeWidth = glowing ? 3.5 : 1.8;
+          // Static lines — always visible, no glow, no pulse
+          const strokeColor = dimmed
+            ? "rgba(212,175,55,0.08)"
+            : "rgba(212,175,55,0.3)";
+          const strokeWidth = 1.8;
 
           return (
             <g key={conn.philosopherId}>
@@ -216,58 +206,15 @@ export default function Home() {
                 fill="none"
                 stroke={strokeColor}
                 strokeWidth={strokeWidth}
-                filter={glowing ? "url(#goldGlow)" : "none"}
-                style={{ transition: "stroke 0.6s, stroke-width 0.6s" }}
+                style={{ transition: "stroke 0.6s" }}
               />
               <path
                 d={bottomPath}
                 fill="none"
                 stroke={strokeColor}
                 strokeWidth={strokeWidth}
-                filter={glowing ? "url(#goldGlow)" : "none"}
-                style={{ transition: "stroke 0.6s, stroke-width 0.6s" }}
+                style={{ transition: "stroke 0.6s" }}
               />
-              {glowing && (
-                <>
-                  {/* Glowing pulse traveling along the top path */}
-                  <path
-                    d={topPath}
-                    fill="none"
-                    stroke="url(#pulseGradient)"
-                    strokeWidth={5}
-                    strokeDasharray="40 300"
-                    filter="url(#goldGlow)"
-                    opacity={0.9}
-                  >
-                    <animate
-                      attributeName="stroke-dashoffset"
-                      from="340"
-                      to="0"
-                      dur="2.5s"
-                      repeatCount="indefinite"
-                    />
-                  </path>
-                  {/* Glowing pulse traveling along the bottom path */}
-                  <path
-                    d={bottomPath}
-                    fill="none"
-                    stroke="url(#pulseGradient)"
-                    strokeWidth={5}
-                    strokeDasharray="40 300"
-                    filter="url(#goldGlow)"
-                    opacity={0.9}
-                  >
-                    <animate
-                      attributeName="stroke-dashoffset"
-                      from="340"
-                      to="0"
-                      dur="2.5s"
-                      repeatCount="indefinite"
-                      begin="1.2s"
-                    />
-                  </path>
-                </>
-              )}
             </g>
           );
         })}
@@ -364,6 +311,21 @@ export default function Home() {
 
       {/* ===== SPACER FOR TOP CONNECTIONS ===== */}
       <div className="shrink-0" style={{ height: "10vh" }} />
+
+      {/* ===== CORE AI ETHICS PRINCIPLES LABEL ===== */}
+      <div className="flex justify-center shrink-0 mb-[0.5vh] relative z-[2]">
+        <div
+          className="px-5 py-0.5 tracking-[0.2em] font-semibold uppercase"
+          style={{
+            color: "#d4af37",
+            fontFamily: '"Playfair Display", Georgia, serif',
+            fontSize: "clamp(7px, 1.1vw, 10px)",
+            textShadow: "0 0 12px rgba(212,175,55,0.15)",
+          }}
+        >
+          Core AI Ethics Principles
+        </div>
+      </div>
 
       {/* ===== PRINCIPLES ROW ===== */}
       <div className="flex justify-around items-center px-2 shrink-0 relative z-[2]" style={{ height: "7vh" }}>
