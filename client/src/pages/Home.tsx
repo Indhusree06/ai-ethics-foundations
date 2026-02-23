@@ -303,26 +303,51 @@ export default function Home() {
             }}
             onClick={() => handleNodeClick(p.id)}
           >
-            <div
-              className="rounded-full overflow-hidden"
-              style={{
-                width: "clamp(65px, 11vw, 100px)",
-                height: "clamp(65px, 11vw, 100px)",
-                border: `3px solid ${
-                  isNodeActive(p.id) ||
-                  (detailLevel === "idle" && connections[idleAnimIndex]?.philosopherId === p.id)
-                    ? "#d4af37"
-                    : "#4a4a30"
-                }`,
-                boxShadow:
-                  isNodeActive(p.id) ||
-                  (detailLevel === "idle" && connections[idleAnimIndex]?.philosopherId === p.id)
-                    ? "0 0 20px rgba(212,175,55,0.6), 0 0 40px rgba(212,175,55,0.2)"
-                    : "0 0 4px rgba(212,175,55,0.08)",
-                transition: "box-shadow 0.6s, border-color 0.6s",
-              }}
-            >
-              <img src={p.image} alt={p.name} className="w-full h-full object-cover" loading="eager" />
+            {/* 3D Portrait with depth */}
+            <div style={{ perspective: "500px" }}>
+              {/* Shadow beneath portrait */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "-5px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: "70%",
+                  height: "10px",
+                  background: "radial-gradient(ellipse, rgba(0,0,0,0.4) 0%, transparent 70%)",
+                  borderRadius: "50%",
+                  filter: "blur(4px)",
+                }}
+              />
+              <div
+                className="rounded-full overflow-hidden relative"
+                style={{
+                  width: "clamp(65px, 11vw, 100px)",
+                  height: "clamp(65px, 11vw, 100px)",
+                  border: `3px solid ${
+                    isNodeActive(p.id) ||
+                    (detailLevel === "idle" && connections[idleAnimIndex]?.philosopherId === p.id)
+                      ? "#f5d76e"
+                      : "#4a4a30"
+                  }`,
+                  boxShadow:
+                    isNodeActive(p.id) ||
+                    (detailLevel === "idle" && connections[idleAnimIndex]?.philosopherId === p.id)
+                      ? "0 6px 24px rgba(212,175,55,0.5), 0 10px 32px rgba(0,0,0,0.3), inset 0 -4px 10px rgba(0,0,0,0.3), inset 0 4px 10px rgba(255,255,255,0.12)"
+                      : "0 4px 14px rgba(0,0,0,0.35), inset 0 -3px 8px rgba(0,0,0,0.25), inset 0 3px 8px rgba(255,255,255,0.06)",
+                  transform: "rotateX(12deg) rotateY(-3deg)",
+                  transition: "box-shadow 0.6s, border-color 0.6s, transform 0.6s",
+                }}
+              >
+                <img src={p.image} alt={p.name} className="w-full h-full object-cover" loading="eager" />
+                {/* Top highlight ring */}
+                <div
+                  className="absolute inset-0 rounded-full pointer-events-none"
+                  style={{
+                    background: "linear-gradient(170deg, rgba(255,255,255,0.15) 0%, transparent 35%, transparent 65%, rgba(0,0,0,0.2) 100%)",
+                  }}
+                />
+              </div>
             </div>
             <p
               className="mt-1.5 text-center font-semibold leading-tight"
@@ -415,7 +440,7 @@ export default function Home() {
                     boxShadow: glowing
                       ? "0 4px 16px rgba(212,175,55,0.5), 0 8px 24px rgba(0,0,0,0.3), inset 0 -2px 6px rgba(0,0,0,0.2), inset 0 2px 6px rgba(255,255,255,0.15)"
                       : "0 2px 8px rgba(0,0,0,0.2), inset 0 -1px 4px rgba(0,0,0,0.15), inset 0 1px 4px rgba(255,255,255,0.05)",
-                    transform: "rotateX(8deg)",
+                    transform: "rotateX(15deg) rotateY(-2deg)",
                     transition: "all 0.5s",
                   }}
                 >
@@ -519,7 +544,7 @@ export default function Home() {
                     (detailLevel === "idle" && connections[idleAnimIndex]?.pioneerId === p.id)
                       ? "0 4px 20px rgba(212,175,55,0.5), 0 8px 30px rgba(0,0,0,0.3), inset 0 -3px 8px rgba(0,0,0,0.25), inset 0 3px 8px rgba(255,255,255,0.1)"
                       : "0 3px 12px rgba(0,0,0,0.3), inset 0 -2px 6px rgba(0,0,0,0.2), inset 0 2px 6px rgba(255,255,255,0.05)",
-                  transform: "rotateX(4deg)",
+                  transform: "rotateX(12deg) rotateY(-3deg)",
                   transition: "box-shadow 0.6s, border-color 0.6s, transform 0.6s",
                 }}
               >
