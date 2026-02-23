@@ -35,6 +35,7 @@ jobs:
       - name: Build
         run: pnpm run build
         env:
+          GITHUB_ACTIONS: true
           VITE_ANALYTICS_ENDPOINT: ""
           VITE_ANALYTICS_WEBSITE_ID: ""
 
