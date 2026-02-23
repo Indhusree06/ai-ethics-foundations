@@ -384,32 +384,71 @@ export default function Home() {
               }}
               onClick={() => handleNodeClick(pr.id)}
             >
-              <div
-                className="flex items-center justify-center"
-                style={{
-                  width: "clamp(85px, 15vw, 130px)",
-                  height: "clamp(50px, 9vw, 72px)",
-                  background: glowing
-                    ? "linear-gradient(135deg, #d4af37, #b8941e)"
-                    : "rgba(212,175,55,0.06)",
-                  border: `1.5px solid ${glowing ? "#d4af37" : "rgba(212,175,55,0.2)"}`,
-                  clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
-                  boxShadow: glowing ? "0 0 18px rgba(212,175,55,0.5)" : "none",
-                  transition: "all 0.5s",
-                }}
-              >
-                <span
-                  className="text-center font-bold uppercase"
+              {/* 3D Diamond with layered depth */}
+              <div style={{ perspective: "400px" }}>
+                {/* Shadow beneath diamond */}
+                <div
                   style={{
-                    fontSize: "clamp(7px, 1.2vw, 10px)",
-                    letterSpacing: "0.04em",
-                    color: glowing ? "#1a1f3d" : "#d4af37",
-                    fontFamily: '"Inter", sans-serif',
-                    lineHeight: 1,
+                    position: "absolute",
+                    bottom: "-6px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "60%",
+                    height: "8px",
+                    background: "radial-gradient(ellipse, rgba(212,175,55,0.25) 0%, transparent 70%)",
+                    borderRadius: "50%",
+                    filter: "blur(3px)",
+                    opacity: glowing ? 1 : 0.3,
+                    transition: "opacity 0.5s",
+                  }}
+                />
+                <div
+                  className="flex items-center justify-center"
+                  style={{
+                    width: "clamp(85px, 15vw, 130px)",
+                    height: "clamp(50px, 9vw, 72px)",
+                    background: glowing
+                      ? "linear-gradient(160deg, #f5d76e 0%, #d4af37 35%, #b8941e 65%, #8a6d14 100%)"
+                      : "linear-gradient(160deg, rgba(212,175,55,0.12) 0%, rgba(212,175,55,0.04) 50%, rgba(140,110,30,0.08) 100%)",
+                    border: `1.5px solid ${glowing ? "#f5d76e" : "rgba(212,175,55,0.25)"}`,
+                    clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
+                    boxShadow: glowing
+                      ? "0 4px 16px rgba(212,175,55,0.5), 0 8px 24px rgba(0,0,0,0.3), inset 0 -2px 6px rgba(0,0,0,0.2), inset 0 2px 6px rgba(255,255,255,0.15)"
+                      : "0 2px 8px rgba(0,0,0,0.2), inset 0 -1px 4px rgba(0,0,0,0.15), inset 0 1px 4px rgba(255,255,255,0.05)",
+                    transform: "rotateX(8deg)",
+                    transition: "all 0.5s",
                   }}
                 >
-                  {pr.name}
-                </span>
+                  {/* Inner highlight streak */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "15%",
+                      left: "25%",
+                      width: "50%",
+                      height: "20%",
+                      background: glowing
+                        ? "linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)"
+                        : "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%)",
+                      clipPath: "polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                  <span
+                    className="text-center font-bold uppercase relative"
+                    style={{
+                      fontSize: "clamp(7px, 1.2vw, 10px)",
+                      letterSpacing: "0.04em",
+                      color: glowing ? "#1a1f3d" : "#d4af37",
+                      fontFamily: '"Inter", sans-serif',
+                      lineHeight: 1,
+                      textShadow: glowing ? "none" : "0 1px 2px rgba(0,0,0,0.3)",
+                      zIndex: 1,
+                    }}
+                  >
+                    {pr.name}
+                  </span>
+                </div>
               </div>
             </div>
           );
@@ -448,26 +487,51 @@ export default function Home() {
             }}
             onClick={() => handleNodeClick(p.id)}
           >
-            <div
-              className="rounded-full overflow-hidden"
-              style={{
-                width: "clamp(65px, 11vw, 100px)",
-                height: "clamp(65px, 11vw, 100px)",
-                border: `3px solid ${
-                  isNodeActive(p.id) ||
-                  (detailLevel === "idle" && connections[idleAnimIndex]?.pioneerId === p.id)
-                    ? "#d4af37"
-                    : "#4a4a30"
-                }`,
-                boxShadow:
-                  isNodeActive(p.id) ||
-                  (detailLevel === "idle" && connections[idleAnimIndex]?.pioneerId === p.id)
-                    ? "0 0 20px rgba(212,175,55,0.6), 0 0 40px rgba(212,175,55,0.2)"
-                    : "0 0 4px rgba(212,175,55,0.08)",
-                transition: "box-shadow 0.6s, border-color 0.6s",
-              }}
-            >
-              <img src={p.image} alt={p.name} className="w-full h-full object-cover" loading="eager" />
+            {/* 3D Portrait with depth */}
+            <div style={{ perspective: "500px" }}>
+              {/* Shadow beneath portrait */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "-4px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: "70%",
+                  height: "10px",
+                  background: "radial-gradient(ellipse, rgba(0,0,0,0.35) 0%, transparent 70%)",
+                  borderRadius: "50%",
+                  filter: "blur(4px)",
+                }}
+              />
+              <div
+                className="rounded-full overflow-hidden relative"
+                style={{
+                  width: "clamp(65px, 11vw, 100px)",
+                  height: "clamp(65px, 11vw, 100px)",
+                  border: `3px solid ${
+                    isNodeActive(p.id) ||
+                    (detailLevel === "idle" && connections[idleAnimIndex]?.pioneerId === p.id)
+                      ? "#f5d76e"
+                      : "#4a4a30"
+                  }`,
+                  boxShadow:
+                    isNodeActive(p.id) ||
+                    (detailLevel === "idle" && connections[idleAnimIndex]?.pioneerId === p.id)
+                      ? "0 4px 20px rgba(212,175,55,0.5), 0 8px 30px rgba(0,0,0,0.3), inset 0 -3px 8px rgba(0,0,0,0.25), inset 0 3px 8px rgba(255,255,255,0.1)"
+                      : "0 3px 12px rgba(0,0,0,0.3), inset 0 -2px 6px rgba(0,0,0,0.2), inset 0 2px 6px rgba(255,255,255,0.05)",
+                  transform: "rotateX(4deg)",
+                  transition: "box-shadow 0.6s, border-color 0.6s, transform 0.6s",
+                }}
+              >
+                <img src={p.image} alt={p.name} className="w-full h-full object-cover" loading="eager" />
+                {/* Top highlight ring */}
+                <div
+                  className="absolute inset-0 rounded-full pointer-events-none"
+                  style={{
+                    background: "linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 40%, transparent 70%, rgba(0,0,0,0.15) 100%)",
+                  }}
+                />
+              </div>
             </div>
             <p
               className="mt-1.5 text-center font-semibold leading-tight"
