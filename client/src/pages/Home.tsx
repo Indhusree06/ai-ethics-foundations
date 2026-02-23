@@ -170,7 +170,7 @@ export default function Home() {
   const princRefs = useRef<(HTMLDivElement | null)[]>([]);
   const pionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [lineCoords, setLineCoords] = useState<
-    { x1: number; y1: number; x2: number; y2: number; x3: number; y3: number }[]
+    { x1: number; y1: number; x2: number; y2: number; x2top: number; y2top: number; x2bot: number; y2bot: number; x3: number; y3: number }[]
   >([]);
 
   const measurePositions = useCallback(() => {
@@ -180,15 +180,24 @@ export default function Home() {
       const philEl = philRefs.current[i];
       const princEl = princRefs.current[i];
       const pionEl = pionRefs.current[i];
-      if (!philEl || !princEl || !pionEl) return { x1: 0, y1: 0, x2: 0, y2: 0, x3: 0, y3: 0 };
+      if (!philEl || !princEl || !pionEl) return { x1: 0, y1: 0, x2: 0, y2: 0, x2top: 0, y2top: 0, x2bot: 0, y2bot: 0, x3: 0, y3: 0 };
       const pRect = philEl.getBoundingClientRect();
       const prRect = princEl.getBoundingClientRect();
       const piRect = pionEl.getBoundingClientRect();
+      // Diamond center
+      const dcx = prRect.left + prRect.width / 2 - containerRect.left;
+      const dcy = prRect.top + prRect.height / 2 - containerRect.top;
+      // Diamond half-size (it's rotated 45deg, so top point is center - half height)
+      const dHalf = prRect.height / 2;
       return {
         x1: pRect.left + pRect.width / 2 - containerRect.left,
-        y1: pRect.top + pRect.height - containerRect.top,
-        x2: prRect.left + prRect.width / 2 - containerRect.left,
-        y2: prRect.top + prRect.height / 2 - containerRect.top,
+        y1: pRect.bottom - containerRect.top,
+        x2: dcx,
+        y2: dcy,
+        x2top: dcx,
+        y2top: dcy - dHalf, // top point of diamond
+        x2bot: dcx,
+        y2bot: dcy + dHalf, // bottom point of diamond
         x3: piRect.left + piRect.width / 2 - containerRect.left,
         y3: piRect.top - containerRect.top,
       };
@@ -300,8 +309,8 @@ export default function Home() {
       >
         <defs>
           <filter id="goldGlow">
-            <feGaussianBlur stdDeviation="4" result="blur" />
-            <feFlood floodColor="#d4af37" floodOpacity="0.5" />
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feFlood floodColor="#e8dcc8" floodOpacity="0.4" />
             <feComposite in2="blur" operator="in" />
             <feMerge>
               <feMergeNode />
@@ -309,18 +318,18 @@ export default function Home() {
             </feMerge>
           </filter>
           <filter id="softGlow">
-            <feGaussianBlur stdDeviation="8" result="blur" />
-            <feFlood floodColor="#f5d76e" floodOpacity="0.25" />
+            <feGaussianBlur stdDeviation="6" result="blur" />
+            <feFlood floodColor="#e8dcc8" floodOpacity="0.2" />
             <feComposite in2="blur" operator="in" />
             <feMerge>
               <feMergeNode />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-          <linearGradient id="goldToWhite" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#d4af37" />
+          <linearGradient id="creamPulse" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#e8dcc8" />
             <stop offset="50%" stopColor="#fff8dc" />
-            <stop offset="100%" stopColor="#d4af37" />
+            <stop offset="100%" stopColor="#e8dcc8" />
           </linearGradient>
         </defs>
         {lineCoords.map((coords, i) => {
@@ -332,89 +341,68 @@ export default function Home() {
           const dimmed =
             detailLevel !== "idle" && !isNodeActive(conn.philosopherId);
 
-          // Truly curved bezier path: philosopher → principle
-          // Alternating curve direction per connection index for visual variety
-          const dy1 = coords.y2 - coords.y1;
-          const dx1 = coords.x2 - coords.x1;
-          // Force a minimum horizontal bulge so even vertically-aligned nodes get visible curves
-          const curveDir1 = (i % 2 === 0) ? 1 : -1; // alternate left/right bulge
-          const minBulge1 = dy1 * 0.35; // at least 35% of vertical distance as horizontal offset
-          const bulge1 = Math.max(Math.abs(dx1) * 0.5, minBulge1) * curveDir1;
-          const cp1x = coords.x1 + bulge1;
-          const cp1y = coords.y1 + dy1 * 0.7;
-          const cp2x = coords.x2 + bulge1 * 0.4;
-          const cp2y = coords.y2 - dy1 * 0.3;
-          const topPath = `M ${coords.x1} ${coords.y1} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${coords.x2} ${coords.y2}`;
+          // Tree branch: philosopher bottom → diamond top point
+          // Organic curve like poster: control points create visible curvature
+          const topDy = coords.y2top - coords.y1;
+          const topDx = coords.x2top - coords.x1;
+          // Add horizontal offset for organic feel (even when vertically aligned)
+          const topBulge = Math.abs(topDx) < 30 ? (i % 2 === 0 ? 40 : -40) : 0;
+          const topPath = `M ${coords.x1} ${coords.y1} C ${coords.x1 + topBulge} ${coords.y1 + topDy * 0.65}, ${coords.x2top - topBulge * 0.3} ${coords.y2top - topDy * 0.35}, ${coords.x2top} ${coords.y2top}`;
 
-          // Truly curved bezier path: principle → pioneer
-          const dy2 = coords.y3 - coords.y2;
-          const dx2 = coords.x3 - coords.x2;
-          const curveDir2 = (i % 2 === 0) ? -1 : 1; // opposite direction from top path
-          const minBulge2 = dy2 * 0.35;
-          const bulge2 = Math.max(Math.abs(dx2) * 0.5, minBulge2) * curveDir2;
-          const cp3x = coords.x2 + bulge2;
-          const cp3y = coords.y2 + dy2 * 0.7;
-          const cp4x = coords.x3 + bulge2 * 0.4;
-          const cp4y = coords.y3 - dy2 * 0.3;
-          const bottomPath = `M ${coords.x2} ${coords.y2} C ${cp3x} ${cp3y}, ${cp4x} ${cp4y}, ${coords.x3} ${coords.y3}`;
+          // Tree root: diamond bottom point → pioneer top
+          const botDy = coords.y3 - coords.y2bot;
+          const botDx = coords.x3 - coords.x2bot;
+          const botBulge = Math.abs(botDx) < 30 ? (i % 2 === 0 ? -40 : 40) : 0;
+          const bottomPath = `M ${coords.x2bot} ${coords.y2bot} C ${coords.x2bot + botBulge} ${coords.y2bot + botDy * 0.65}, ${coords.x3 - botBulge * 0.3} ${coords.y3 - botDy * 0.35}, ${coords.x3} ${coords.y3}`;
 
+          // Cream/gold palette — not too much gold
+          // All lines visible; active ones brighter
           const baseStroke = dimmed
-            ? "rgba(212,175,55,0.03)"
+            ? "rgba(232,220,200,0.06)"
             : glowing
-            ? "#d4af37"
-            : "rgba(255,248,220,0.1)";
-          const baseWidth = glowing ? 2.5 : 1;
+            ? "#e8dcc8"
+            : "rgba(232,220,200,0.25)";
+          const baseWidth = glowing ? 2 : 1.5;
 
           return (
             <g key={conn.philosopherId}>
-              {/* Base path */}
-              <path d={topPath} fill="none" stroke={baseStroke} strokeWidth={baseWidth} style={{ transition: "all 0.8s ease" }} />
-              <path d={bottomPath} fill="none" stroke={baseStroke} strokeWidth={baseWidth} style={{ transition: "all 0.8s ease" }} />
+              {/* Base paths */}
+              <path d={topPath} fill="none" stroke={baseStroke} strokeWidth={baseWidth} strokeLinecap="round" style={{ transition: "all 0.8s ease" }} />
+              <path d={bottomPath} fill="none" stroke={baseStroke} strokeWidth={baseWidth} strokeLinecap="round" style={{ transition: "all 0.8s ease" }} />
 
               {glowing && (
                 <>
-                  {/* Soft outer glow */}
-                  <path d={topPath} fill="none" stroke="#f5d76e" strokeWidth={6} filter="url(#softGlow)" opacity={0.25} />
-                  <path d={bottomPath} fill="none" stroke="#f5d76e" strokeWidth={6} filter="url(#softGlow)" opacity={0.25} />
+                  {/* Soft glow behind active line */}
+                  <path d={topPath} fill="none" stroke="#e8dcc8" strokeWidth={5} filter="url(#softGlow)" opacity={0.2} />
+                  <path d={bottomPath} fill="none" stroke="#e8dcc8" strokeWidth={5} filter="url(#softGlow)" opacity={0.2} />
 
                   {/* Traveling light pulse — top path */}
                   <path
                     d={topPath}
                     fill="none"
-                    stroke="url(#goldToWhite)"
-                    strokeWidth={3}
-                    strokeDasharray="25 250"
+                    stroke="url(#creamPulse)"
+                    strokeWidth={2.5}
+                    strokeDasharray="20 200"
                     strokeLinecap="round"
                     filter="url(#goldGlow)"
-                    opacity={0.85}
+                    opacity={0.75}
                   >
-                    <animate attributeName="stroke-dashoffset" from="275" to="0" dur="2.2s" repeatCount="indefinite" />
+                    <animate attributeName="stroke-dashoffset" from="220" to="0" dur="2.5s" repeatCount="indefinite" />
                   </path>
 
                   {/* Traveling light pulse — bottom path */}
                   <path
                     d={bottomPath}
                     fill="none"
-                    stroke="url(#goldToWhite)"
-                    strokeWidth={3}
-                    strokeDasharray="25 250"
+                    stroke="url(#creamPulse)"
+                    strokeWidth={2.5}
+                    strokeDasharray="20 200"
                     strokeLinecap="round"
                     filter="url(#goldGlow)"
-                    opacity={0.85}
+                    opacity={0.75}
                   >
-                    <animate attributeName="stroke-dashoffset" from="275" to="0" dur="2.2s" repeatCount="indefinite" begin="0.9s" />
+                    <animate attributeName="stroke-dashoffset" from="220" to="0" dur="2.5s" repeatCount="indefinite" begin="1s" />
                   </path>
-
-                  {/* Spark dots at connection endpoints */}
-                  <circle cx={coords.x1} cy={coords.y1} r="3" fill="#fff8dc" filter="url(#goldGlow)" opacity={0.7}>
-                    <animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite" />
-                  </circle>
-                  <circle cx={coords.x2} cy={coords.y2} r="4" fill="#d4af37" filter="url(#goldGlow)" opacity={0.85}>
-                    <animate attributeName="r" values="3;5.5;3" dur="2s" repeatCount="indefinite" />
-                  </circle>
-                  <circle cx={coords.x3} cy={coords.y3} r="3" fill="#fff8dc" filter="url(#goldGlow)" opacity={0.7}>
-                    <animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite" begin="0.9s" />
-                  </circle>
                 </>
               )}
             </g>
@@ -554,48 +542,40 @@ export default function Home() {
               }}
               onClick={() => handleNodeClick(pr.id)}
             >
-              {/* Diamond shape via CSS rotate */}
+              {/* Diamond shape via CSS rotate with principle name text inside */}
               <div
                 className="relative flex items-center justify-center"
                 style={{
-                  width: "clamp(48px, 8vw, 68px)",
-                  height: "clamp(48px, 8vw, 68px)",
+                  width: "clamp(56px, 10vw, 82px)",
+                  height: "clamp(56px, 10vw, 82px)",
                   background: glowing
-                    ? "linear-gradient(135deg, rgba(212,175,55,0.25), rgba(212,175,55,0.08))"
-                    : "rgba(255,248,220,0.025)",
-                  border: `1.5px solid ${glowing ? "#d4af37" : "rgba(255,248,220,0.08)"}`,
+                    ? "linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.06))"
+                    : "rgba(255,248,220,0.02)",
+                  border: `1.5px solid ${glowing ? "#d4af37" : "rgba(255,248,220,0.1)"}`,
                   transform: "rotate(45deg)",
                   boxShadow: glowing
-                    ? "0 0 20px rgba(212,175,55,0.35), inset 0 0 12px rgba(212,175,55,0.08)"
+                    ? "0 0 18px rgba(212,175,55,0.3), inset 0 0 10px rgba(212,175,55,0.06)"
                     : "none",
                   transition: "background 0.6s, border-color 0.6s, box-shadow 0.6s",
                 }}
               >
-                <div
+                <span
+                  className="font-bold uppercase text-center leading-tight"
                   style={{
-                    width: "clamp(18px, 3.2vw, 26px)",
-                    height: "clamp(18px, 3.2vw, 26px)",
-                    color: glowing ? "#d4af37" : "rgba(255,248,220,0.25)",
-                    transition: "color 0.6s",
                     transform: "rotate(-45deg)",
+                    fontSize: "clamp(5px, 0.8vw, 7px)",
+                    letterSpacing: "0.03em",
+                    color: glowing ? "#d4af37" : "rgba(255,248,220,0.4)",
+                    fontFamily: '"Inter", sans-serif',
+                    transition: "color 0.6s",
+                    maxWidth: "clamp(42px, 8vw, 62px)",
+                    wordBreak: "break-word",
+                    lineHeight: 1.1,
                   }}
                 >
-                  {principleIcons[pr.id]}
-                </div>
+                  {pr.name}
+                </span>
               </div>
-              <p
-                className="mt-1.5 text-center font-bold uppercase"
-                style={{
-                  fontSize: "clamp(5px, 0.85vw, 7px)",
-                  letterSpacing: "0.06em",
-                  color: glowing ? "#d4af37" : "rgba(255,248,220,0.35)",
-                  fontFamily: '"Inter", sans-serif',
-                  lineHeight: 1.2,
-                  transition: "color 0.4s",
-                }}
-              >
-                {pr.name}
-              </p>
             </div>
           );
         })}
