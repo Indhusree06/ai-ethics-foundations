@@ -304,7 +304,7 @@ export default function Home() {
       </div>
 
       {/* ===== PHILOSOPHERS ROW ===== */}
-      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "20vh" }}>
+      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]">
         {philosophers.map((p, i) => (
           <div
             key={p.id}
@@ -363,7 +363,7 @@ export default function Home() {
       </div>
 
       {/* ===== SPACER FOR TOP CONNECTIONS ===== */}
-      <div className="shrink-0" style={{ height: "10vh" }} />
+      <div className="grow" style={{ minHeight: "3vh" }} />
 
       {/* ===== PRINCIPLES ROW ===== */}
       <div className="flex justify-around items-center px-2 shrink-0 relative z-[2]" style={{ height: "7vh" }}>
@@ -416,7 +416,7 @@ export default function Home() {
       </div>
 
       {/* ===== SPACER FOR BOTTOM CONNECTIONS ===== */}
-      <div className="shrink-0" style={{ height: "8vh" }} />
+      <div className="grow" style={{ minHeight: "3vh" }} />
 
       {/* ===== MODERN PIONEERS BANNER ===== */}
       <div className="flex justify-center shrink-0 mb-[0.8vh] relative z-[2]">
@@ -434,7 +434,7 @@ export default function Home() {
       </div>
 
       {/* ===== PIONEERS ROW ===== */}
-      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "20vh" }}>
+      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]">
         {pioneers.map((p, i) => (
           <div
             key={p.id}
@@ -493,7 +493,7 @@ export default function Home() {
       </div>
 
       {/* ===== FOOTER ===== */}
-      <div className="text-center shrink-0 mt-auto pb-[1.5vh] relative z-[2]">
+      <div className="text-center shrink-0 pb-[1.5vh] pt-[1vh] relative z-[2]">
         <p
           className="tracking-widest"
           style={{ color: "#5a5a6a", fontFamily: '"Inter", sans-serif', fontSize: "clamp(8px, 1.2vw, 11px)" }}
