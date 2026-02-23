@@ -165,6 +165,13 @@ export default function Home() {
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
+          <linearGradient id="pulseGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="transparent" />
+            <stop offset="30%" stopColor="#f5d76e" />
+            <stop offset="50%" stopColor="#fff8dc" />
+            <stop offset="70%" stopColor="#f5d76e" />
+            <stop offset="100%" stopColor="transparent" />
+          </linearGradient>
         </defs>
         {lineCoords.map((coords, i) => {
           if (!coords.x1 && !coords.y1) return null;
@@ -221,9 +228,45 @@ export default function Home() {
                 style={{ transition: "stroke 0.6s, stroke-width 0.6s" }}
               />
               {glowing && (
-                <circle r="4" fill="#d4af37" opacity="0.85">
-                  <animateMotion dur="3s" repeatCount="indefinite" path={fullPath} />
-                </circle>
+                <>
+                  {/* Glowing pulse traveling along the top path */}
+                  <path
+                    d={topPath}
+                    fill="none"
+                    stroke="url(#pulseGradient)"
+                    strokeWidth={5}
+                    strokeDasharray="40 300"
+                    filter="url(#goldGlow)"
+                    opacity={0.9}
+                  >
+                    <animate
+                      attributeName="stroke-dashoffset"
+                      from="340"
+                      to="0"
+                      dur="2.5s"
+                      repeatCount="indefinite"
+                    />
+                  </path>
+                  {/* Glowing pulse traveling along the bottom path */}
+                  <path
+                    d={bottomPath}
+                    fill="none"
+                    stroke="url(#pulseGradient)"
+                    strokeWidth={5}
+                    strokeDasharray="40 300"
+                    filter="url(#goldGlow)"
+                    opacity={0.9}
+                  >
+                    <animate
+                      attributeName="stroke-dashoffset"
+                      from="340"
+                      to="0"
+                      dur="2.5s"
+                      repeatCount="indefinite"
+                      begin="1.2s"
+                    />
+                  </path>
+                </>
               )}
             </g>
           );
@@ -503,7 +546,7 @@ export default function Home() {
       {/* ===== LEVEL 1 INFO CARD ===== */}
       <AnimatePresence>
         {detailLevel === "level1" && activeConnection && (
-          <Level1Card connection={activeConnection} onExpand={() => setDetailLevel("level2")} />
+          <Level1Card connection={activeConnection} onExpand={() => setDetailLevel("level2")} onClose={handleBackToOverview} />
         )}
       </AnimatePresence>
 
@@ -514,6 +557,7 @@ export default function Home() {
             connection={activeConnection}
             onDeepDive={() => setDetailLevel("level3")}
             onBack={() => setDetailLevel("level1")}
+            onClose={handleBackToOverview}
           />
         )}
       </AnimatePresence>
@@ -533,19 +577,27 @@ export default function Home() {
 }
 
 /* ============ Level 1 Card ============ */
-function Level1Card({ connection, onExpand }: { connection: Connection; onExpand: () => void }) {
+function Level1Card({ connection, onExpand, onClose }: { connection: Connection; onExpand: () => void; onClose: () => void }) {
   const phil = philosophers.find((p) => p.id === connection.philosopherId)!;
   const princ = principles.find((p) => p.id === connection.principleId)!;
   const pion = pioneers.find((p) => p.id === connection.pioneerId)!;
 
   return (
     <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+      className="absolute inset-0 z-40 flex items-center justify-center"
+      onClick={onClose}
+    >
+    <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 30 }}
       transition={{ duration: 0.35 }}
-      className="absolute left-1/2 -translate-x-1/2 z-40 w-[88%] max-w-md"
-      style={{ top: "50%", transform: "translate(-50%, -50%)" }}
+      className="w-[88%] max-w-md"
+      onClick={(e) => e.stopPropagation()}
     >
       <div
         className="rounded-xl p-4"
@@ -594,6 +646,7 @@ function Level1Card({ connection, onExpand }: { connection: Connection; onExpand
         </div>
       </div>
     </motion.div>
+    </motion.div>
   );
 }
 
@@ -602,10 +655,12 @@ function Level2Panel({
   connection,
   onDeepDive,
   onBack,
+  onClose,
 }: {
   connection: Connection;
   onDeepDive: () => void;
   onBack: () => void;
+  onClose: () => void;
 }) {
   const phil = philosophers.find((p) => p.id === connection.philosopherId)!;
   const princ = principles.find((p) => p.id === connection.principleId)!;
@@ -619,9 +674,11 @@ function Level2Panel({
       transition={{ duration: 0.35 }}
       className="absolute inset-0 z-40 flex items-center justify-center p-3"
       style={{ background: "rgba(10, 13, 28, 0.94)" }}
+      onClick={onClose}
     >
       <div
         className="w-full max-w-lg rounded-xl overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
         style={{
           background: "linear-gradient(180deg, #111530 0%, #1a1f3d 100%)",
           border: "1px solid rgba(212,175,55,0.25)",
