@@ -86,14 +86,14 @@ export default function Home() {
       const dHalfH = prRect.height / 2;
       return {
         x1: pRect.left + pRect.width / 2 - containerRect.left,
-        // Find the portrait circle img inside this element and use its bottom edge
+        // Use the portrait image BOTTOM edge (text is now above the image)
         y1: (() => {
           const imgEl = philEl.querySelector('img');
           if (imgEl) {
             const imgRect = imgEl.getBoundingClientRect();
             return imgRect.bottom - containerRect.top;
           }
-          return pRect.top + pRect.height * 0.45 - containerRect.top;
+          return pRect.bottom - containerRect.top;
         })(),
         x2top: dcx,
         y2top: dcy - dHalfH,
@@ -291,7 +291,7 @@ export default function Home() {
       </div>
 
       {/* ===== CLASSICAL PHILOSOPHY BANNER ===== */}
-      <div className="flex justify-center shrink-0 mb-[1vh] relative z-[2]">
+      <div className="flex justify-center shrink-0 mb-[2vh] relative z-[2]">
         <div
           className="px-6 py-1 tracking-[0.2em] font-semibold uppercase"
           style={{
@@ -305,11 +305,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ===== PHILOSOPHERS ROW (convex arc) ===== */}
-      <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "22vh" }}>
+      {/* ===== PHILOSOPHERS ROW (convex arc — text above image) ===== */}
+      <div className="flex justify-around items-end px-2 shrink-0 relative z-[2]" style={{ height: "26vh" }}>
         {philosophers.map((p, i) => {
-          // Convex arch: center highest, edges lowest — symmetric with pioneer U-curve
-          const arcOffsets = [7, 2.5, 0, 2.5, 7]; // vh units, positive = push down
+          // Convex arch: center highest, edges lowest — symmetric offsets matching pioneer U-curve
+          const arcOffsets = [0, 4.5, 7, 4.5, 0]; // vh units, positive = push UP (via bottom alignment)
           const arcOffset = arcOffsets[i] || 0;
           return (
           <div
@@ -320,13 +320,45 @@ export default function Home() {
               opacity: getNodeOpacity(p.id),
               transition: "opacity 0.5s, transform 0.5s",
               width: "18%",
-              transform: `translateY(${arcOffset}vh)`,
+              transform: `translateY(-${arcOffset}vh)`,
             }}
             onClick={() => handleNodeClick(p.id)}
           >
-            {/* 3D Portrait with depth */}
+            {/* Text ABOVE the portrait */}
+            <p
+              className="mb-1 text-center font-semibold leading-tight"
+              style={{
+                fontSize: "clamp(9px, 1.6vw, 13px)",
+                color: "#fff",
+                fontFamily: '"Inter", sans-serif',
+              }}
+            >
+              {p.name}
+            </p>
+            <p
+              className="text-center italic leading-tight mb-1"
+              style={{
+                fontSize: "clamp(6px, 1.1vw, 9px)",
+                color: "#d4af37cc",
+                fontFamily: '"Inter", sans-serif',
+              }}
+            >
+              {p.framework}
+            </p>
+            <p
+              className="text-center leading-tight mb-1.5"
+              style={{
+                fontSize: "clamp(5px, 0.9vw, 7.5px)",
+                color: "rgba(255,255,255,0.5)",
+                fontFamily: '"Inter", sans-serif',
+                fontStyle: "italic",
+                maxWidth: "90%",
+              }}
+            >
+              '{p.quote}'
+            </p>
+            {/* 3D Portrait */}
             <div style={{ perspective: "500px" }}>
-              {/* Shadow beneath portrait */}
               <div
                 style={{
                   position: "absolute",
@@ -361,7 +393,6 @@ export default function Home() {
                 }}
               >
                 <img src={p.image} alt={p.name} className="w-full h-full object-cover" loading="eager" />
-                {/* Top highlight ring */}
                 <div
                   className="absolute inset-0 rounded-full pointer-events-none"
                   style={{
@@ -370,38 +401,6 @@ export default function Home() {
                 />
               </div>
             </div>
-            <p
-              className="mt-1.5 text-center font-semibold leading-tight"
-              style={{
-                fontSize: "clamp(9px, 1.6vw, 13px)",
-                color: "#fff",
-                fontFamily: '"Inter", sans-serif',
-              }}
-            >
-              {p.name}
-            </p>
-            <p
-              className="text-center italic leading-tight"
-              style={{
-                fontSize: "clamp(6px, 1.1vw, 9px)",
-                color: "#d4af37cc",
-                fontFamily: '"Inter", sans-serif',
-              }}
-            >
-              {p.framework}
-            </p>
-            <p
-              className="text-center leading-tight mt-0.5"
-              style={{
-                fontSize: "clamp(5px, 0.9vw, 7.5px)",
-                color: "rgba(255,255,255,0.5)",
-                fontFamily: '"Inter", sans-serif',
-                fontStyle: "italic",
-                maxWidth: "90%",
-              }}
-            >
-              '{p.quote}'
-            </p>
           </div>
           );
         })}
@@ -536,7 +535,7 @@ export default function Home() {
       <div className="flex justify-around items-start px-2 shrink-0 relative z-[2]" style={{ height: "22vh" }}>
         {pioneers.map((p, i) => {
           // U-shape: center lowest, edges highest — exact mirror of philosopher arch
-          const arcOffsets = [0, 4.5, 7, 4.5, 0]; // vh units, positive = push down, mirrors [7,2.5,0,2.5,7]
+          const arcOffsets = [0, 4.5, 7, 4.5, 0]; // vh units, positive = push down, mirrors philosopher [0,4.5,7,4.5,0]
           const arcOffset = arcOffsets[i] || 0;
           return (
           <div
